@@ -1,75 +1,873 @@
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Complaint X</title>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}"/>
-	</head>
-	
-	<body>
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">		
-				<div class="col-md-8 col-xl-6 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="{{ url_for('static', filename='vecteezy_robot-face-tech_49329807.png') }}" class="rounded-circle user_img">
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span>Complaint X</span>
-									<p>Hi! I’m Complaint_X_Bot, your insurance assistant. 📝 Need policy info, have a complaint, or require urgent help? Just ask, and I’ll sort it out!</p>
-								</div>
-							</div>
-						</div>
-						<div id="messageFormeight" class="card-body msg_card_body"></div>
-						<div class="card-footer">
-							<form id="messageArea" class="input-group">
-                                <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
-								<div class="input-group-append">
-									<button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-			$(document).ready(function() {
-				$("#messageArea").on("submit", function(event) {
-					const date = new Date();
-					const hour = date.getHours();
-					const minute = date.getMinutes();
-					const str_time = hour+":"+minute;
-					var rawText = $("#text").val();
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint X</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}"/>
+    <style>
+        /* Professional Google-inspired light theme */
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #3c4043;
+        }
+        
+        .container-fluid {
+            height: 100vh;
+            padding: 0;
+        }
+        
+        .row {
+            height: 100%;
+            margin: 0;
+        }
+        
+        .chat {
+            height: 100%;
+            padding: 0;
+            max-width: 100%;
+        }
+        
+        .card {
+            height: 100vh;
+            border-radius: 0 !important;
+            background-color: #ffffff !important;
+            border: none !important;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+        }
+        
+        .card-header {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #e8eaed !important;
+            padding: 16px 24px !important;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Changed to space-between to allow room for the button */
+        }
+        
+        .card-header-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user_img {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            margin-right: 16px;
+            object-fit: contain;
+        }
 
-					var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + rawText + '<span class="msg_time_send">'+ str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
-					
-					$("#text").val("");
-					$("#messageFormeight").append(userHtml);
+        .user_img22 {
+            height: 70px;
+            width: 70px;
+            border-radius: 50%;
+            margin-right: 16px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        
+        .online_icon {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #34a853;
+            border-radius: 50%;
+            bottom: 10px;
+            right: 10px;
+            border: 2px solid #ffffff;
+        }
+        
+        .img_cont {
+            position: relative;
+        }
+        
+        .user_info span {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: #202124;
+        }
+        
+        .user_info p {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+        
+        .msg_card_body {
+            background-color: #f8f9fa !important;
+            padding: 20px !important;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .card-footer {
+            background-color: #ffffff !important;
+            border-top: 1px solid #e8eaed !important;
+            padding: 16px 24px !important;
+            flex-shrink: 0;
+        }
+        
+        .type_msg {
+            background-color: #f1f3f4 !important;
+            color: #3c4043 !important;
+            border: 1px solid transparent !important;
+            border-radius: 24px !important;
+            height: 48px !important;
+            padding: 0 16px !important;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .type_msg:focus {
+            box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15) !important;
+            background-color: #ffffff !important;
+            border-color: #e8eaed !important;
+        }
+        
+        .send_btn {
+            border-radius: 50% !important;
+            width: 42px;
+            height: 42px;
+            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1a73e8 !important;
+            color: white !important;
+            border: none !important;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        
+        .send_btn:hover {
+            background-color: #1967d2 !important;
+        }
+        
+        .input-group {
+            align-items: center;
+        }
+        
+        .msg_cotainer {
+            background-color: #ffffff;
+            border: 1px solid #e8eaed;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.1);
+            position: relative;
+            animation: fadeIn 0.3s ease;
+            padding: 12px 16px;
+            margin-left: 10px;
+            max-width: 80%;
+            color: #202124;
+            font-size: 14px;
+        }
+        
+        .msg_cotainer_send {
+            background-color: #e8f0fe;
+            border-radius: 12px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+            padding: 12px 16px;
+            margin-right: 10px;
+            max-width: 80%;
+            color: #202124;
+            font-size: 14px;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.1);
+        }
+        
+        .msg_time {
+            position: absolute;
+            left: 5px;
+            bottom: -20px;
+            color: #80868b;
+            font-size: 11px;
+        }
+        
+        .msg_time_send {
+            position: absolute;
+            right: 5px;
+            bottom: -20px;
+            color: #80868b;
+            font-size: 11px;
+        }
+        
+        .user_img_msg {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .img_cont_msg {
+            height: 40px;
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Ensure the col takes full width on all devices */
+        .col-md-8.col-xl-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        
+        /* Feedback container */
+        .feedback-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            margin: 16px 0;
+            animation: fadeIn 0.3s ease;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-					$.ajax({
-						data: {
-							msg: rawText,	
-						},
-						type: "POST",
-						url: "/get",
-					}).done(function(data) {
-						var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="{{ url_for('static', filename='vecteezy_robot-face-tech_49329807.png') }}" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + str_time + '</span></div></div>';
-						$("#messageFormeight").append($.parseHTML(botHtml));
-					});
-					event.preventDefault();
-				});
-			});
-		</script>
-	</body>
+        .hallucination-warning {
+            color: #ea4335;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            background-color: #fce8e6;
+            padding: 8px 16px;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .hallucination-warning i {
+            margin-right: 8px;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .feedback-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            border: none;
+        }
+
+        .satisfied-btn {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        .satisfied-btn:hover {
+            background-color: #1967d2;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+
+        .not-satisfied-btn {
+            background-color: #ffffff;
+            color: #1a73e8;
+            border: 1px solid #dadce0;
+        }
+
+        .not-satisfied-btn:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+
+        /* Agent connection banner */
+        .connecting-agent {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 20px auto;
+            text-align: center;
+            display: none;
+            width: 80%;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.1);
+            font-weight: 500;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .connecting-agent i {
+            margin-right: 8px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Agent connected banner */
+        .agent-connected {
+            background-color: #e6f4ea;
+            color: #137333;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 20px auto;
+            text-align: center;
+            display: none;
+            width: 80%;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.1);
+            font-weight: 500;
+            font-family: 'Google Sans', sans-serif;
+        }
+        
+        /* System message */
+        .system-message {
+            text-align: center;
+            background-color: #f8f9fa;
+            color: #5f6368;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin: 16px auto;
+            width: 70%;
+            font-size: 13px;
+            border: 1px solid #dadce0;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* Typing indicator */
+        .typing {
+            min-width: 70px;
+            padding: 8px 16px !important;
+        }
+        
+        .typing-dots {
+            display: flex;
+            justify-content: center;
+            padding: 4px 0;
+        }
+        
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #5f6368;
+            margin: 0 4px;
+            animation: typingDot 1.4s infinite ease-in-out;
+        }
+        
+        .dot:nth-child(1) { animation-delay: 0s; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typingDot {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bdc1c6;
+        }
+        
+        /* Connect Agent Button */
+        .connect-agent-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .connect-agent-btn:hover {
+            background-color: #1967d2;
+            box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        
+        .connect-agent-btn:disabled {
+            background-color: #dadce0;
+            color: #5f6368;
+            cursor: not-allowed;
+        }
+        
+        /* Mobile responsiveness */
+        @media(max-width: 576px) {
+            .feedback-container {
+                width: 95%;
+            }
+            
+            .feedback-buttons {
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
+            }
+            
+            .feedback-btn {
+                width: 100%;
+            }
+            
+            .connecting-agent, .agent-connected {
+                width: 90%;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .connect-agent-btn {
+                margin-top: 12px;
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">        
+            <div class="col-md-8 col-xl-6 chat">
+                <div class="card">
+                    <div class="card-header msg_head">
+                        <div class="card-header-left">
+                            <div class="img_cont">
+                                <img src="https://www.shutterstock.com/image-vector/chat-bot-icon-design-robot-600nw-2476207303.jpg" class="user_img22">
+                                <span class="online_icon"></span>
+                            </div>
+                            <div class="user_info">
+                                <span>Complaint X</span>
+                                <p id="chat-status">Hi! I'm Complaint_X_Bot, your insurance assistant. 📝 Need policy info, have a complaint, or require urgent help? Just ask, and I'll sort it out!</p>
+                            </div>
+                        </div>
+                        <!-- New Connect Agent Button -->
+                        <button id="connect-agent-btn" class="connect-agent-btn">
+                            <i class="fas fa-headset"></i> Connect with Agent
+                        </button>
+                    </div>
+                    
+                    <!-- Agent Connection Banners -->
+                    <div id="agent-connection-banner" class="connecting-agent">
+                        <i class="fas fa-sync-alt"></i> Connecting you to an agent... Please wait.
+                    </div>
+                    <div id="agent-connected-banner" class="agent-connected">
+                        <i class="fas fa-headset"></i> You are now connected with an agent.
+                    </div>
+                    
+                    <div id="messageFormeight" class="card-body msg_card_body"></div>
+                    
+                    <div class="card-footer">
+                        <form id="messageArea" class="input-group">
+                            <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
+                            <div class="input-group-append">
+                                <button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize variables
+            let lastMessageId = 0;
+            let waitingForAgent = false;
+            let connectedToAgent = false;
+            let sessionId = generateSessionId();
+            
+            // Connect to Socket.IO
+            const socket = io();
+            
+            // Listen for agent connection
+            socket.on('agent_connected', function(data) {
+                // Show agent connected banner
+                $("#agent-connection-banner").hide();
+                $("#agent-connected-banner").fadeIn(500);
+                
+                // Update chat status
+                $("#chat-status").text(`You are now chatting with Agent ${data.agent_id}`);
+                
+                // Set connected flag
+                connectedToAgent = true;
+                waitingForAgent = false;
+                
+                // Add system message
+                addSystemMessage(data.message);
+                
+                // Update Connect Agent button state
+                updateConnectAgentButton();
+                
+                // Scroll to bottom
+                scrollToBottom();
+            });
+            
+            // Listen for agent disconnection
+            socket.on('agent_disconnected', function(data) {
+                // Hide agent banners
+                $("#agent-connected-banner").fadeOut(500);
+                
+                // Update chat status
+                $("#chat-status").text("Hi! I'm your insurance assistant. Need policy info, have a complaint, or require urgent help? Just ask!");
+                
+                // Set connected flag
+                connectedToAgent = false;
+                waitingForAgent = false;
+                
+                // Add system message
+                addSystemMessage(data.message);
+                
+                // Update Connect Agent button state
+                updateConnectAgentButton();
+                
+                // Scroll to bottom
+                scrollToBottom();
+            });
+            
+            // Listen for new messages from agent
+            socket.on('new_message', function(data) {
+                // Only process if messages from agent
+                if (data.sender === 'agent') {
+                    // Add agent message
+                    addMessage('bot', data.message);
+                    
+                    // Scroll to bottom
+                    scrollToBottom();
+                }
+            });
+            
+            // Generate a session ID if not in local storage
+            function generateSessionId() {
+                let stored = localStorage.getItem('chatSessionId');
+                if (!stored) {
+                    stored = 'session_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('chatSessionId', stored);
+                }
+                return stored;
+            }
+            
+            // Get hallucination threshold from server
+            const HALLUCINATION_THRESHOLD = {{ HALLUCINATION_THRESHOLD }};
+            
+            // Format time for display
+            function formatTime() {
+                const date = new Date();
+                let hours = date.getHours();
+                let minutes = date.getMinutes();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // convert 0 to 12
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                return hours + ':' + minutes + ' ' + ampm;
+            }
+            
+            // Scroll to bottom of message area
+            function scrollToBottom() {
+                const messageArea = document.getElementById('messageFormeight');
+                messageArea.scrollTop = messageArea.scrollHeight;
+            }
+            
+            // Add typing indicator
+            function showTypingIndicator() {
+                const typingHtml = '<div id="typing-indicator" class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://www.shutterstock.com/image-vector/chat-bot-icon-design-robot-600nw-2476207303.jpg" class="rounded-circle user_img_msg"></div><div class="msg_cotainer typing"><div class="typing-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div></div>';
+                $("#messageFormeight").append(typingHtml);
+                scrollToBottom();
+            }
+            
+            // Remove typing indicator
+            function removeTypingIndicator() {
+                $("#typing-indicator").remove();
+            }
+            
+            // Add a message to the chat
+            function addMessage(sender, text) {
+                const timeStr = formatTime();
+                let messageHtml = '';
+                
+                if (sender === 'user') {
+                    messageHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + text + '<span class="msg_time_send">' + timeStr + '</span></div><div class="img_cont_msg"><img src="https://st.depositphotos.com/1537427/3571/v/450/depositphotos_35717211-stock-illustration-vector-user-icon.jpg" class="rounded-circle user_img_msg"></div></div>';
+                } else if (sender === 'bot') {
+                    messageHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://www.shutterstock.com/image-vector/chat-bot-icon-design-robot-600nw-2476207303.jpg" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + text + '<span class="msg_time">' + timeStr + '</span></div></div>';
+                }
+                
+                $("#messageFormeight").append(messageHtml);
+                scrollToBottom();
+                
+                return messageHtml;
+            }
+            
+            // Add a system message to the chat
+            function addSystemMessage(text) {
+                const messageHtml = '<div class="system-message"><i class="fas fa-info-circle"></i> ' + text + '</div>';
+                $("#messageFormeight").append(messageHtml);
+            }
+            
+            // Update Connect Agent button state
+            function updateConnectAgentButton() {
+                if (connectedToAgent) {
+                    // Already connected to an agent
+                    $("#connect-agent-btn").prop("disabled", true);
+                    $("#connect-agent-btn").html('<i class="fas fa-headset"></i> Connected to Agent');
+                } else if (waitingForAgent) {
+                    // Waiting for an agent
+                    $("#connect-agent-btn").prop("disabled", true);
+                    $("#connect-agent-btn").html('<i class="fas fa-sync-alt fa-spin"></i> Connecting...');
+                } else {
+                    // Not connected and not waiting
+                    $("#connect-agent-btn").prop("disabled", false);
+                    $("#connect-agent-btn").html('<i class="fas fa-headset"></i> Connect with Agent');
+                }
+            }
+            
+            // Connect Agent button click handler
+            $("#connect-agent-btn").click(function() {
+                if (connectedToAgent || waitingForAgent) {
+                    return; // Already connected or waiting
+                }
+                
+                // Set waiting state
+                waitingForAgent = true;
+                updateConnectAgentButton();
+                
+                // Show connecting banner
+                $("#agent-connection-banner").fadeIn(500);
+                
+                // Request an agent
+                requestAgent();
+            });
+            
+            // Request an agent
+            function requestAgent() {
+                $.ajax({
+                    data: {
+                        session_id: sessionId,
+                        isSatisfied: false
+                    },
+                    type: "POST",
+                    url: "/feedback",
+                }).done(function(data) {
+                    // Add waiting message
+                    addSystemMessage("You've been placed in queue for an agent. Position: " + data.waiting_position);
+                    
+                    // Start periodic status check
+                    checkAgentConnection();
+                });
+            }
+            
+            // Handle message submission
+            $("#messageArea").on("submit", function(event) {
+                event.preventDefault();
+                
+                if (waitingForAgent) {
+                    alert("Please wait while we connect you to an agent.");
+                    $("#text").val("");
+                    return;
+                }
+                
+                const rawText = $("#text").val().trim();
+                if (!rawText) return;
+                
+                // Add user message to chat
+                addMessage('user', rawText);
+                
+                // Clear input
+                $("#text").val("");
+                
+                // If connected to agent, send via socket
+                if (connectedToAgent) {
+                    socket.emit('send_message', {
+                        session_id: sessionId,
+                        sender: 'user',
+                        message: rawText
+                    });
+                    return;
+                }
+                
+                // Otherwise, send to AI assistant
+                showTypingIndicator();
+                
+                $.ajax({
+                    data: {
+                        msg: rawText,
+                        session_id: sessionId
+                    },
+                    type: "POST",
+                    url: "/get",
+                }).done(function(data) {
+                    removeTypingIndicator();
+                    
+                    let response;
+                    let isHallucination = false;
+                    let hallucinationScore = 0;
+                    let botResponse = "";
+                    
+                    // Parse response
+                    try {
+                        response = JSON.parse(data);
+                        hallucinationScore = response.hallucination_score;
+                        isHallucination = response.is_hallucination;
+                        botResponse = response.answer;
+                        
+                        // Log details for debugging
+                        console.log("Hallucination score:", hallucinationScore);
+                        console.log("Threshold:", HALLUCINATION_THRESHOLD);
+                        console.log("Is hallucination (from server):", isHallucination);
+                    } catch (e) {
+                        console.log("Parsing response failed:", e);
+                        botResponse = data;
+                    }
+                    
+                    // Add bot message
+                    addMessage('bot', botResponse);
+                    
+                    // Increment message ID
+                    lastMessageId++;
+                    const currentMessageId = lastMessageId;
+                    
+                    // Show feedback options if it's a hallucination
+                    if (isHallucination) {
+                        let feedbackHtml = '<div class="feedback-container" id="feedback-container-' + currentMessageId + '">';
+                        feedbackHtml += '<div class="hallucination-warning"><i class="fas fa-exclamation-triangle"></i> This response may not be based on our knowledge base.</div>';
+                        feedbackHtml += '<div class="feedback-buttons" id="feedback-' + currentMessageId + '">';
+                        feedbackHtml += '<button class="feedback-btn satisfied-btn" onclick="provideFeedback(' + currentMessageId + ', true)"><i class="fas fa-check"></i> Satisfied</button>';
+                        feedbackHtml += '<button class="feedback-btn not-satisfied-btn" onclick="provideFeedback(' + currentMessageId + ', false)"><i class="fas fa-headset"></i> Connect with agent</button>';
+                        feedbackHtml += '</div></div>';
+                        
+                        // Add feedback container
+                        $("#messageFormeight").append(feedbackHtml);
+                        scrollToBottom();
+                    }
+                });
+            });
+            
+            // Initialize socket connection for the user
+            socket.emit('join_session', {
+                session_id: sessionId,
+                is_agent: false
+            });
+            
+            // Check for existing agent connection on load
+            socket.emit('get_agent_status', {
+                session_id: sessionId
+            });
+            
+            // Handle agent status response
+            socket.on('agent_status', function(data) {
+                if (data.connected) {
+                    // We're already connected to an agent
+                    connectedToAgent = true;
+                    $("#agent-connected-banner").show();
+                    $("#chat-status").text(`You are now chatting with Agent ${data.agent_id}`);
+                    
+                    // Update Connect Agent button
+                    updateConnectAgentButton();
+                }
+            });
+            
+            // Make feedback function available globally
+            window.provideFeedback = function(messageId, isSatisfied) {
+                if (isSatisfied) {
+                    // User is satisfied with the response
+                    $("#feedback-container-" + messageId).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                } else {
+                    // User wants to connect with an agent
+                    waitingForAgent = true;
+                    
+                    // Update Connect Agent button
+                    updateConnectAgentButton();
+                    
+                    // Hide feedback container
+                    $("#feedback-container-" + messageId).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                    
+                    // Show connecting banner
+                    $("#agent-connection-banner").fadeIn(500);
+                    
+                    // Send feedback to server
+                    $.ajax({
+                        data: {
+                            messageId: messageId,
+                            isSatisfied: false,
+                            session_id: sessionId
+                        },
+                        type: "POST",
+                        url: "/feedback",
+                    }).done(function(data) {
+                        // Add waiting message
+                        addSystemMessage("You've been placed in queue for an agent. Position: " + data.waiting_position);
+                        
+                        // Start periodic status check
+                        checkAgentConnection();
+                    });
+                }
+            };
+            
+            // Check for agent connection periodically when waiting
+            function checkAgentConnection() {
+                if (waitingForAgent && !connectedToAgent) {
+                    socket.emit('get_agent_status', {
+                        session_id: sessionId
+                    });
+                    
+                    // Check again in 5 seconds
+                    setTimeout(checkAgentConnection, 5000);
+                }
+            }
+            
+            // Initialize the Connect Agent button state on load
+            updateConnectAgentButton();
+        });
+
+    </script>
+</body>
 </html>
+    
+    
